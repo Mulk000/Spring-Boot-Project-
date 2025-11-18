@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Course Manager</title>
+
+    <style>
+        body {
+            background: linear-gradient(to right, #ffb3ec, #d7a3ff);
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            color: #4a0e4e;
+        }
+
+        h1 {
+            text-align: center;
+            color: purple;
+            text-shadow: 2px 2px pink;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
+            margin-bottom: 30px;
+        }
+
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 10px;
+            border: 2px solid purple;
+        }
+
+        button {
+            background: purple;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: hotpink;
+        }
+
+        .butterfly {
+            position: absolute;
+            width: 80px;
+            opacity: 0.9;
+            animation: fly 8s infinite;
+        }
+
+        @keyframes fly {
+            0% { transform: translate(0,0); }
+            50% { transform: translate(50px,-50px); }
+            100% { transform: translate(0,0); }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffe6ff;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid purple;
+            text-align: center;
+        }
+
+        th {
+            background: purple;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<img class="butterfly" src="https://i.imgur.com/CM9bFhP.png" style="top:20px; left:10px;">
+<img class="butterfly" src="https://i.imgur.com/CM9bFhP.png" style="top:200px; right:30px;">
+<img class="butterfly" src="https://i.imgur.com/CM9bFhP.png" style="bottom:50px; left:200px;">
+
+<h1>🦋 Course Manager 🦋</h1>
+
+<!-- CREATE -->
+<div class="container">
+    <h2>Create Course</h2>
+    <input id="createName" placeholder="Name">
+    <input id="createDuration" placeholder="Duration">
+    <input id="createCategory" placeholder="Category">
+    <button onclick="createCourse()">Create</button>
+    <p id="createResult"></p>
+</div>
+
+<!-- GET ALL -->
+<div class="container">
+    <h2>All Courses</h2>
+    <button onclick="getAll()">Refresh</button>
+
+    <table id="courseTable">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Duration</th>
+            <th>Category</th>
+            <th>Created</th>
+            <th>Active</th>
+        </tr>
+    </table>
+</div>
+
+<!-- GET BY ID -->
+<div class="container">
+    <h2>Get Course by ID</h2>
+    <input id="getId" placeholder="Enter ID">
+    <button onclick="getById()">Get</button>
+    <pre id="getResult"></pre>
+</div>
+
+<!-- UPDATE -->
+<div class="container">
+    <h2>Update Course</h2>
+    <input id="updateId" placeholder="ID">
+    <input id="updateName" placeholder="New Name">
+    <input id="updateDuration" placeholder="New Duration">
+    <input id="updateCategory" placeholder="New Category">
+    <button onclick="updateCourse()">Update</button>
+    <p id="updateResult"></p>
+</div>
+
+<!-- DELETE -->
+<div class="container">
+    <h2>Delete Course</h2>
+    <input id="deleteId" placeholder="ID">
+    <button onclick="deleteCourse()">Delete</button>
+    <p id="deleteResult"></p>
+</div>
+
+<script>
+    const BASE = "http://localhost:8080";
+
+    async function createCourse() {
+        let data = {
+            name: document.getElementById("createName").value,
+            duration: document.getElementById("createDuration").value,
+            category: document.getElementById("createCategory").value
+        };
+
+        try {
+            let res = await fetch(`${BASE}/Create`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+
+            let text = await res.text();
+            document.getElementById("createResult").innerText = text || "Create completed.";
+            getAll();
+        } catch (err) {
+            document.getElementById("createResult").innerText = "Error: " + err.message;
+        }
+    }
+
+    async function getAll() {
+        try {
+            let res = await fetch(`${BASE}/getAll`);
+            let list = await res.json();
+
+            let table = document.getElementById("courseTable");
+
+            table.innerHTML = `
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Duration</th>
+                    <th>Category</th>
+                    <th>Created</th>
+                    <th>Active</th>
+                </tr>
+            `;
+
+            list.forEach(course => {
+                table.innerHTML += `
+                    <tr>
+                        <td>${course.id}</td>
+                        <td>${course.name}</td>
+                        <td>${course.duration}</td>
+                        <td>${course.category ?? '-'}</td>
+                        <td>${course.createddate}</td>
+                        <td>${course.isActive}</td>
+                    </tr>
+                `;
+            });
+        } catch (err) {
+            // Keep table as-is; optionally show an error somewhere
+            console.error("getAll error:", err);
+        }
+    }
+
+    async function getById() {
+        let id = document.getElementById("getId").value;
+        try {
+            let res = await fetch(`${BASE}/getById?id=${encodeURIComponent(id)}`);
+            let course = await res.json();
+
+            document.getElementById("getResult").innerText = JSON.stringify(course, null, 2);
+        } catch (err) {
+            document.getElementById("getResult").innerText = "Error: " + err.message;
+        }
+    }
+
+    async function updateCourse() {
+        let data = {
+            id: document.getElementById("updateId").value,
+            name: document.getElementById("updateName").value,
+            duration: document.getElementById("updateDuration").value,
+            category: document.getElementById("updateCategory").value,
+            // Send ISO string to avoid backend date parsing issues
+            updateddate: new Date().toISOString()
+        };
+
+        try {
+            let res = await fetch(`${BASE}/Update`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+
+            let text = await res.text();
+            document.getElementById("updateResult").innerText = text || "Update completed.";
+            getAll();
+        } catch (err) {
+            document.getElementById("updateResult").innerText = "Error: " + err.message;
+        }
+    }
+
+    async function deleteCourse() {
+        let id = document.getElementById("deleteId").value;
+        try {
+            let res = await fetch(`${BASE}/Delete/${encodeURIComponent(id)}`, { method: "DELETE" });
+
+            let text = await res.text();
+            document.getElementById("deleteResult").innerText = text || "Delete completed.";
+            getAll();
+        } catch (err) {
+            document.getElementById("deleteResult").innerText = "Error: " + err.message;
+        }
+    }
+
+    // Optional: initial load
+    getAll();
+</script>
+
+</body>
+</html>
