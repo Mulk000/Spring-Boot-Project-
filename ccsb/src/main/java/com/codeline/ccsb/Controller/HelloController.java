@@ -53,7 +53,8 @@ public class HelloController {
 
             existingCourseToUpdate.setName(updateObjectFromUser.getName());
             existingCourseToUpdate.setDuration(updateObjectFromUser.getDuration());
-            existingCourseToUpdate.setUpdateddate(updateObjectFromUser.getUpdateddate());
+            existingCourseToUpdate.setCategory(updateObjectFromUser.getCategory());
+            existingCourseToUpdate.setUpdateddate(new Date());
             courseList.add(existingCourseToUpdate);
 
             return "course updated Successfully";
