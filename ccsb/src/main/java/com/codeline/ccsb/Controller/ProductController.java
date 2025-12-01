@@ -17,13 +17,13 @@ public class ProductController {
 
 
     @PostMapping("create")
-    public Product CreateProduct( @Valid @RequestBody ProductDto requestObj) {
+    public Product createProduct( @Valid @RequestBody ProductDto requestObj) {
         Product product = productService.saveProduct(requestObj);
         return product;
     }
     @GetMapping("getAll")
-    public List<Product> GetAllProduct() {
-        List<Product> productList = productService.GetAllProducts();
+    public List<Product> getAllProduct() {
+        List<Product> productList = productService.getAllProducts();
         return productList;
        }
 
@@ -33,13 +33,13 @@ public class ProductController {
     }
 
     @PutMapping("update/{id}")
-    public Product UpdateCourse(@PathVariable Integer id, @Valid @RequestBody ProductDto updatedObj ) throws Exception {
+    public Product updateCourse(@PathVariable Integer id, @Valid @RequestBody ProductDto updatedObj ) throws Exception {
         return productService.updateProduct(id,updatedObj);
 
 
 }
-@DeleteMapping("Delete/{id}")
-    public String DeleteCourse(@PathVariable int id) throws Exception {
+@DeleteMapping("delete/{id}")
+    public String deleteCourse(@PathVariable int id) throws Exception {
         productService.deleteProduct(id);
         return "Success";
 

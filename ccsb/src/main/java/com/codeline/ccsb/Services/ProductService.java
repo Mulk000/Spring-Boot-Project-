@@ -13,7 +13,7 @@ public class ProductService {
     @Autowired
     ProductRepository productRepository;
 
-    public List<Product> GetAllProducts() {
+    public List<Product> getAllProducts() {
         return productRepository.findAll().stream()
                 .filter(p -> Boolean.TRUE.equals(p.getIsActive()))
                 .toList();
