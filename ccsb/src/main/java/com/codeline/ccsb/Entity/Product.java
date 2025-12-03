@@ -1,0 +1,29 @@
+package com.codeline.ccsb.Entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Date;
+@Data
+@Builder
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+public class Product {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    Integer id;
+    String name;
+    String category;
+    Double price;
+    Integer quantity;
+    Boolean isActive;
+    Date createdDate;
+    Date updatedDate;
+     @OneToOne(mappedBy ="product", cascade = CascadeType.ALL)
+
+     Instructor instructor ;
+}
